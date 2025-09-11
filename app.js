@@ -1,14 +1,74 @@
-const dotenv = require("dotenv");
-const prisma = require("./db/prisma");
-const cors = require("cors");
+import express from "express"
+import dotenv from "dotenv";
+import prisma from "./src/db/prisma.js"
+import cors from "cors";
+import session from "express-session";
+import passport from "passport";
+import passportLocal from "passport-local"
+import bcrypt from "bcryptjs";
+
+const LocalStrategy = passportLocal.Strategy;
+
+
+
+import routes from "./src/routes/index.js"
 
 dotenv.config();
+
+passport.use(
+  new LocalStrategy(async (username, password, done) => {
+    try {
+      const { rows } = await prisma.user.findFirst({
+        where:{
+         name:username   
+        }
+      });
+      const user = rows[0];
+
+      if (!user) {
+        return done(null, false, { message: "Incorrect username" });
+      }
+      const match = await bcrypt.compare(user.password, user.password);
+      if (!match) {
+        return done(null, false, { message: "Incorrect password" });
+      }
+      return done(null, user);
+    } catch(err) {
+      return done(err);
+    }
+  })
+);
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const { rows } = await prisma.user.findFirst({
+        where:{
+            name:username   
+        }
+      });
+    const user = rows[0];
+
+    done(null, user);
+  } catch(err) {
+    done(err);
+  }
+});
 
 const app = express();
 app.use(cors());
 
-app.get("/", (req,res)=> res.send("Hello World"));
+app.use(session({secret:"orcas", resave:false, saveUninitialized:false}));
+app.use(passport.session());
 
+app.use("/post",routes.post);
+app.use("/user",routes.user);
+app.use("/auth",routes.login);
+
+app.get("/", (req,res)=> res.send("Hello World"));
 
 const PORT = process.env.PORT || 3000;
 
