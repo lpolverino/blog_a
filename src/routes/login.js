@@ -1,40 +1,12 @@
 import { Router } from "express";
-import prisma from "../db/prisma.js"
-import passport from "passport";
-import bcrypt from "bcryptjs";
+import loginController from "../controller/loginController";
 
 const router = Router();
 
-router.post("/sign", async(req,res,next)=>{
-    try{
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        await prisma.user.create({
-            data:{
-                email: req.body.email,
-                password:hashedPassword
-            }
-        });
-        res.redirect("/");
-    }catch(err){
-        return next(err);
-    }
-})
+router.post("/sign",loginController.singUp);
 
-router.post(
-  "/log-in",
-  passport.authenticate("local", {
-    successRedirect: "/",
-    failureRedirect: "/"
-  })
-);
+router.post("/log-in", loginController.logIn);
 
-router.get("/log-out", (req, res, next) => {
-  req.logout((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.redirect("/");
-  });
-});
+router.get("/log-out",loginController.logOut);
 
 export default router;

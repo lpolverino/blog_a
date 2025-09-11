@@ -9,18 +9,16 @@ import bcrypt from "bcryptjs";
 
 const LocalStrategy = passportLocal.Strategy;
 
-
-
 import routes from "./src/routes/index.js"
 
 dotenv.config();
 
 passport.use(
-  new LocalStrategy(async (username, password, done) => {
+  new LocalStrategy(async (email, password, done) => {
     try {
       const { rows } = await prisma.user.findFirst({
         where:{
-         name:username   
+         email:email   
         }
       });
       const user = rows[0];
@@ -28,7 +26,7 @@ passport.use(
       if (!user) {
         return done(null, false, { message: "Incorrect username" });
       }
-      const match = await bcrypt.compare(user.password, user.password);
+      const match = await bcrypt.compare(user.password, password);
       if (!match) {
         return done(null, false, { message: "Incorrect password" });
       }
@@ -71,6 +69,12 @@ app.use("/auth",routes.login);
 app.get("/", (req,res)=> res.send("Hello World"));
 
 const PORT = process.env.PORT || 3000;
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.statusCode || 500).send(err.message);
+});
+
 
 app.listen(PORT, (error) =>{
     if(error){
