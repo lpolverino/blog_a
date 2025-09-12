@@ -14,6 +14,7 @@ const validateUser = [
         .trim()
         .isAlphanumeric()
         .isLength({ min: 4, max: 56 })
+        .withMessage("Invalid name value")
 ]
 
 const getAllUsers = [
@@ -40,7 +41,7 @@ const getUserById = [
 
         const { userId } = req.params;
         try {
-            const user = await userdb.getUserById(parseInt(userId));
+            const user = await userdb.getUserById(parseInt(userId,10));
 
             if (!user) {
 
@@ -62,11 +63,11 @@ const modifyUser = [
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             req.status(400).json({
-                title: "Get User", errors: errors.array()
+                title: "Modify User", errors: errors.array()
             })
         }
 
-        const userId = parseInt(req.params.userId);
+        const userId = parseInt(req.params.userId,10);
         try {
             const user = await userdb.getUserById(userId);
 
