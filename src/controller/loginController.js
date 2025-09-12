@@ -1,4 +1,4 @@
-import userdb from "../db/user";
+import userdb from "../db/user.js";
 import bcrypt from "bcryptjs";
 import passport from "passport";
 import {body, validationResult} from "express-validator";

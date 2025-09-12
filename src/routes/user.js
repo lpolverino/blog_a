@@ -3,9 +3,7 @@ import userController from "../controller/userController.js";
 
 const router = Router();
 
-router.get("/", (req,res) =>{
-    return res.send("user");
-});
+router.get("/", userController.getAllUsers);
 
 router.get("/:userId",userController.getUserById);
 

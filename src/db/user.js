@@ -8,6 +8,10 @@ async function getUserById(userId){
     }) 
 };
 
+async function getAllUsers() {
+    return prisma.user.findMany();
+}
+
 async function createUser(email, password){
     return await prisma.user.create({
         data:{
@@ -18,7 +22,20 @@ async function createUser(email, password){
     });
 }
 
+async function modifyUser(userId, name){
+    return await prisma.user.update({
+        where:{
+            id:userId
+        },
+        data:{
+            Name:name
+        }
+    })
+}
+
 export default {
     getUserById,
-    createUser
+    createUser,
+    getAllUsers,
+    modifyUser
 };

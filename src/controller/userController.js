@@ -2,47 +2,87 @@ import userdb from "../db/user.js";
 import expressValidator from "express-validator";
 import NotFoundError from "../errors/NotFoundError.js";
 
-const {param: param, validationResult} = expressValidator;
+const { param: param, validationResult, body } = expressValidator;
 
 const validateUserId = [
     param("userId")
         .isNumeric().withMessage("userId has to be a numeric value")
 ]
 
+const validateUser = [
+    body("name")
+        .trim()
+        .isAlphanumeric()
+        .isLength({ min: 4, max: 56 })
+]
+
+const getAllUsers = [
+    async (req, res) => {
+        try {
+            const users = await userdb.getAllUsers();
+            return res.json(users);
+        } catch (err) {
+            console.error(err);
+            return res.status(500).send("Internal Server Error")
+        }
+    }
+]
 
 const getUserById = [
     validateUserId,
-    async (req,res) => {
+    async (req, res) => {
         const errors = validationResult(req);
-        if(!errors.isEmpty()){
+        if (!errors.isEmpty()) {
             req.status(400).json({
-                title:"Get User", errors: errors.array()
+                title: "Get User", errors: errors.array()
             })
         }
-        
-        const {userId} = req.params;
-        try {   
+
+        const { userId } = req.params;
+        try {
             const user = await userdb.getUserById(parseInt(userId));
-            
-            if (!user){
-                
+
+            if (!user) {
+
                 throw new NotFoundError("User not found");
-                return;
             }
-            
-            res.json(user);
-        }catch(err) {
+
+            return res.json(user);
+        } catch (err) {
             console.error(err);
             return res.status(500).send("Internal server error");
         }
     }
 ]
 
-const createUser = [
+const modifyUser = [
+    validateUserId,
+    validateUser,
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            req.status(400).json({
+                title: "Get User", errors: errors.array()
+            })
+        }
 
+        const userId = parseInt(req.params.userId);
+        try {
+            const user = await userdb.getUserById(userId);
+
+            if (!user) {
+                throw new NotFoundError("User not found");
+            }
+            await userdb.modifyUser(userId, req,body.name);
+        } catch(err){
+            console.error(err);
+            res.status(500).send("Internal server error");
+        }
+    }
 ]
 
 export default {
+    getAllUsers,
     getUserById,
-    createUser,
+    modifyUser,
 }
