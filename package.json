@@ -12,7 +12,8 @@
     "prisma": "^6.15.0"
   },
   "scripts": {
-    "start": "node --watch app.js"
+    "start": "node --watch app.js",
+    "seed": "node src/db/seed.js"
   },
   "type": "module"
 }
