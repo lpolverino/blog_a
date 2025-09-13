@@ -21,7 +21,7 @@ const singUp = [
     async(req,res,next)=>{
         const errors = validationResult(req);
         if(!errors.isEmpty()){
-            req.status(400).json({
+            res.status(400).json({
                 title:"Get User", errors: errors.array()
             })
         }
@@ -39,7 +39,7 @@ const logIn = [
     (req,res) => {
         const errors = validationResult(req);
         if(!errors.isEmpty()){
-            req.status(400).json({
+            res.status(400).json({
                 title:"Get User", errors: errors.array()
             })
         }

@@ -40,7 +40,7 @@ const getPost = [
     async (req,res) =>{
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            req.status(400).json({
+            res.status(400).json({
                 title: "Get Post", errors: errors.array()
             })
         }
@@ -79,7 +79,7 @@ const createPost = [
     async (req,res) =>{
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            req.status(400).json({
+            res.status(400).json({
                 title: "Create Post", errors: errors.array()
             })
         }
@@ -121,7 +121,7 @@ const updatePost = [
     async (req,res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            req.status(400).json({
+            res.status(400).json({
                 title: "Get Post", errors: errors.array()
             })
         }
@@ -154,7 +154,7 @@ const deletePost = [
     async (req,res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            req.status(400).json({
+            res.status(400).json({
                 title: "Get Post", errors: errors.array()
             })
         }
