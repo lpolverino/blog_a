@@ -14,19 +14,21 @@ import routes from "./src/routes/index.js"
 dotenv.config();
 
 passport.use(
-  new LocalStrategy(async (email, password, done) => {
+  new LocalStrategy(
+    { usernameField: "email", passwordField: "password" },
+    async (username, password, done) => {
     try {
-      const { rows } = await prisma.user.findFirst({
+      const user = await prisma.user.findFirst({
         where:{
-         email:email   
+         email:username 
         }
       });
-      const user = rows[0];
+      console.log(user);
 
       if (!user) {
         return done(null, false, { message: "Incorrect username" });
       }
-      const match = await bcrypt.compare(user.password, password);
+      const match = await bcrypt.compare(password, user.password);
       if (!match) {
         return done(null, false, { message: "Incorrect password" });
       }
@@ -57,9 +59,14 @@ passport.deserializeUser(async (id, done) => {
 });
 
 const app = express();
+
+app.use(express.json());
 app.use(cors());
+app.use(passport.initialize());
+
 
 app.use(session({secret:"orcas", resave:false, saveUninitialized:false}));
+app.use(express.urlencoded({ extended: false }));
 app.use(passport.session());
 
 app.use("/post",routes.post);

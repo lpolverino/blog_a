@@ -1,7 +1,8 @@
 import userdb from "../db/user.js";
 import bcrypt from "bcryptjs";
 import passport from "passport";
-import {body, validationResult} from "express-validator";
+import { body, validationResult } from "express-validator";
+import jwt from "jsonwebtoken";
 
 const validateUser = [
     body("email")
@@ -11,42 +12,59 @@ const validateUser = [
     body("password")
         .trim()
         .isAlphanumeric()
-        .isLength({min:4, max:56})
+        .isLength({ min: 4, max: 56 })
         .withMessage("Invalid password")
 ]
 
 
 const singUp = [
     validateUser,
-    async(req,res,next)=>{
+    async (req, res, next) => {
         const errors = validationResult(req);
-        if(!errors.isEmpty()){
+        if (!errors.isEmpty()) {
             res.status(400).json({
-                title:"Get User", errors: errors.array()
+                title: "Get User", errors: errors.array()
             })
         }
-        try{
+        try {
             const hashedPassword = await bcrypt.hash(req.body.password, 10);
             const user = userdb.createUser(req.body.email, hashedPassword);
             res.json(user.id);
-        }catch(err){
+        } catch (err) {
             return next(err);
         }
     }
 ]
 const logIn = [
     validateUser,
-    (req,res) => {
+    (req, res, next) => {
         const errors = validationResult(req);
-        if(!errors.isEmpty()){
+        if (!errors.isEmpty()) {
             res.status(400).json({
-                title:"Get User", errors: errors.array()
+                title: "Get User", errors: errors.array()
             })
         }
-        passport.authenticate("local", {
-            successRedirect: "/",
-            failureRedirect: "/"
-        });
+
+        passport.authenticate("local", { session: false }, (err, user, info) => {
+            console.log({
+                err,
+                user,
+                info
+            });
+            
+            if (err) return next(err);
+            if (!user) {
+                return res.status(401).json({ message: "Credenciales incorrectas" });
+            }
+
+            const token = jwt.sign(
+                { id: user.id, username: user.username }, 
+                process.env.JWT_SECRET,                  
+                { expiresIn: "1h" }                      
+            );
+
+            res.json({ message: "Login exitoso", token });
+        })(req, res, next);
     }
 ]
 const logOut = [
