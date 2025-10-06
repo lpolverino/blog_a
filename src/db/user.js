@@ -12,12 +12,12 @@ async function getAllUsers() {
     return prisma.user.findMany();
 }
 
-async function createUser(email, password){
+async function createUser(email, password, name){
     return await prisma.user.create({
         data:{
             email:email,
             password:password,
-            Name:"",
+            Name:name,
         }
     });
 }

@@ -13,9 +13,14 @@ const validateUser = [
         .trim()
         .isAlphanumeric()
         .isLength({ min: 4, max: 56 })
-        .withMessage("Invalid password")
+        .withMessage("Invalid password"),
+    body("name")
+        .trim()
+        .optional()
+        .isAlphanumeric()
+        .isLength({min:1,max:56})
+        .withMessage("Invalid Name")
 ]
-
 
 const singUp = [
     validateUser,
@@ -28,8 +33,13 @@ const singUp = [
         }
         try {
             const hashedPassword = await bcrypt.hash(req.body.password, 10);
-            const user = userdb.createUser(req.body.email, hashedPassword);
-            res.json(user.id);
+            const user = await userdb.createUser(req.body.email, hashedPassword, req.body.name);
+            const token = jwt.sign(
+                { id: user.id, username: user.username }, 
+                process.env.JWT_SECRET,                  
+                { expiresIn: "1h" }                      
+            );
+            res.json({token, user});
         } catch (err) {
             return next(err);
         }
@@ -46,12 +56,7 @@ const logIn = [
         }
 
         passport.authenticate("local", { session: false }, (err, user, info) => {
-            console.log({
-                err,
-                user,
-                info
-            });
-            
+
             if (err) return next(err);
             if (!user) {
                 return res.status(401).json({ message: "Credenciales incorrectas" });
@@ -63,7 +68,7 @@ const logIn = [
                 { expiresIn: "1h" }                      
             );
 
-            res.json({ message: "Login exitoso", token });
+            res.json({ message: "Login exitoso", token , user });
         })(req, res, next);
     }
 ]
