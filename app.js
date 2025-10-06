@@ -6,6 +6,7 @@ import session from "express-session";
 import passport from "passport";
 import passportLocal from "passport-local"
 import bcrypt from "bcryptjs";
+import auth from "./src/middleware/auth.js";
 
 const LocalStrategy = passportLocal.Strategy;
 
@@ -69,7 +70,7 @@ app.use(session({secret:"orcas", resave:false, saveUninitialized:false}));
 app.use(express.urlencoded({ extended: false }));
 app.use(passport.session());
 
-app.use("/post",routes.post);
+app.use("/post", auth.authenticateJWT, routes.post);
 app.use("/user",routes.user);
 app.use("/auth",routes.login);
 

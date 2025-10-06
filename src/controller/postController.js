@@ -45,7 +45,6 @@ const getPost = [
             })
         }
         const postId = parseInt(req.params.postId,10);
-
         try{
             const post = await postdb.getPost(postId)
             
@@ -64,6 +63,7 @@ const getPost = [
 const getAllPosts = [
     async (req,res) =>{
         try{
+            console.log(req.user);
             const posts = await postdb.getAllPosts();
             return res.json(posts);
         }catch(err){
