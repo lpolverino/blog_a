@@ -4,12 +4,19 @@ async function getUserById(userId){
     return prisma.user.findFirst({
         where:{
             id: userId
+        },
+        omit:{
+            password:true,
         }
     }) 
 };
 
 async function getAllUsers() {
-    return prisma.user.findMany();
+    return prisma.user.findMany({
+        omit:{
+            password:true,
+        }
+    });
 }
 
 async function createUser(email, password, name){
