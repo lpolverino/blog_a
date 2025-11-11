@@ -4,12 +4,27 @@ async function getPost(postId){
     return prisma.post.findFirst({
         where:{
             id:postId
+        },
+        include:{
+            author:{
+                select:{
+                    Name:true
+                }
+            }
         }
     })
 }
 
 async function getAllPosts(){
-    return prisma.post.findMany();
+    return prisma.post.findMany({
+        include:{
+            author:{
+                select:{
+                    Name:true,
+                }
+            }
+        }
+    });
 }
 
 async function createPost(post) {
